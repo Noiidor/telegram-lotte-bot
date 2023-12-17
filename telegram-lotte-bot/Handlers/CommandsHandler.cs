@@ -1,6 +1,5 @@
-﻿
+﻿using Microsoft.Extensions.Logging;
 using System.Net;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace telegram_lotte_bot.Handlers
 {
@@ -12,6 +11,7 @@ namespace telegram_lotte_bot.Handlers
         private string ChatId { get { return _credentials.GetChatId(); } } // Поменять на динамически-получаемый id
 
         private readonly TelegramCredentials _credentials;
+        private readonly ILogger _logger;
 
         private static readonly HttpClient _httpClient = new HttpClient(new SocketsHttpHandler
         {
@@ -21,9 +21,10 @@ namespace telegram_lotte_bot.Handlers
             BaseAddress = new Uri(@$"https://api.telegram.org")
         };
 
-        public CommandsHandler(TelegramCredentials credentials)
+        public CommandsHandler(TelegramCredentials credentials, ILogger logger)
         {
             _credentials = credentials;
+            _logger = logger;
         }
 
         public async Task SendMessage(string text)
@@ -32,6 +33,8 @@ namespace telegram_lotte_bot.Handlers
 
             var content = new StringContent($"chat_id={ChatId}&text={Uri.EscapeDataString(text)}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
             HttpResponseMessage response = await _httpClient.PostAsync(apiEndpoint, content);
+
+            _logger.LogInformation("test");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {

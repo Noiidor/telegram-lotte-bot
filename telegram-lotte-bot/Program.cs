@@ -1,4 +1,5 @@
-﻿using telegram_lotte_bot.Handlers;
+﻿using Microsoft.Extensions.Logging;
+using telegram_lotte_bot.Handlers;
 
 namespace telegram_lotte_bot
 {
@@ -6,10 +7,13 @@ namespace telegram_lotte_bot
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Started.");
+            ILogger logger = LoggerConfiguration.CreateLogger();
+
+            logger.LogInformation("Started.");
 
             TelegramCredentials credentials = new();
-            CommandsHandler commandsHandler = new(credentials);
+
+            CommandsHandler commandsHandler = new(credentials, logger);
 
             await commandsHandler.SendMessage("test");
         }

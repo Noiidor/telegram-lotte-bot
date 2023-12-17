@@ -15,7 +15,14 @@ namespace telegram_lotte_bot
 
             CommandsHandler commandsHandler = new(credentials, logger);
 
-            await commandsHandler.SendMessage("test");
+            long offset = 0;
+            while (true)
+            {
+                var updates = await commandsHandler.GetUpdates(offset);
+
+                updates.Select(e => offset = e.Id + 1);
+            }
+
         }
     }
 }

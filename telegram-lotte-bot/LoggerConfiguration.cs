@@ -13,7 +13,10 @@ namespace telegram_lotte_bot
         {
             ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             {
-                builder.AddConsole();
+                builder.AddConsole(options =>
+                {
+                    options.TimestampFormat = "[HH:mm:ss]\n";
+                });
             });
 
             return loggerFactory.CreateLogger("MainLogger");

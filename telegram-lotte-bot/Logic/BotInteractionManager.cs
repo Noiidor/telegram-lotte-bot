@@ -1,28 +1,25 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using telegram_lotte_bot.DTO;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
-namespace telegram_lotte_bot.Handlers
+namespace telegram_lotte_bot.Logic
 {
-    public class CommandHandler
+    public class BotInteractionManager
     {
         private readonly TelegramCredentials _credentials;
         private readonly ILogger _logger;
+        private readonly HttpClient _httpClient;
 
-        private static readonly HttpClient _httpClient = new HttpClient(new SocketsHttpHandler
-        {
-            PooledConnectionLifetime = TimeSpan.FromHours(1)
-        })
-        {
-            BaseAddress = new Uri(@$"https://api.telegram.org")
-        };
-
-        public CommandHandler(TelegramCredentials credentials, ILogger logger)
+        public BotInteractionManager(TelegramCredentials credentials, ILogger logger, HttpClient httpClient)
         {
             _credentials = credentials;
             _logger = logger;
+            _httpClient = httpClient;
         }
 
         public async Task SendMessage(long chatId, string text)
@@ -65,11 +62,6 @@ namespace telegram_lotte_bot.Handlers
             {
                 _logger.LogInformation("Message reply error.");
             }
-        }
-
-        public async Task HandleUpdates(List<Update> updates)
-        {
-
         }
     }
 }

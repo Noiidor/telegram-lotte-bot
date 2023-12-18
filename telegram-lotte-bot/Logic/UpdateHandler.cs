@@ -3,29 +3,23 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using telegram_lotte_bot.DTO;
 
-namespace telegram_lotte_bot.Handlers
+namespace telegram_lotte_bot.Logic
 {
     public class UpdateHandler
     {
         private readonly TelegramCredentials _credentials;
         private readonly ILogger _logger;
         private readonly CommandHandler _commandHandler;
-
-        private static readonly HttpClient _httpClient = new HttpClient(new SocketsHttpHandler
-        {
-            PooledConnectionLifetime = TimeSpan.FromHours(1)
-        })
-        {
-            BaseAddress = new Uri(@$"https://api.telegram.org")
-        };
+        private readonly HttpClient _httpClient;
 
         int LONG_POOLING_TIMEOUT = 60;
 
-        public UpdateHandler(TelegramCredentials credentials, ILogger logger, CommandHandler commandHandler)
+        public UpdateHandler(TelegramCredentials credentials, ILogger logger, HttpClient httpClient, CommandHandler commandHandler)
         {
             _credentials = credentials;
             _logger = logger;
             _commandHandler = commandHandler;
+            _httpClient = httpClient;
         }
 
         public async Task StartHandlingUpdates(CancellationToken cancellationToken)

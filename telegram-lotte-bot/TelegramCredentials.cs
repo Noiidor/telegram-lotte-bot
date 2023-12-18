@@ -23,10 +23,5 @@ namespace telegram_lotte_bot
         {
             return configuration.GetSection("BotToken").Value;
         }
-
-        public string GetChatId()
-        {
-            return configuration.GetSection("ChatId").Value;
-        }
     }
 }

@@ -6,13 +6,8 @@ using telegram_lotte_bot.DTO;
 
 namespace telegram_lotte_bot.Handlers
 {
-    public class CommandsHandler
+    public class CommandHandler
     {
-        // Чисто сахар что бы каждый раз не писать _credentials.GetBotToken()
-        private string BotToken { get { return _credentials.GetBotToken(); } }
-
-        private string ChatId { get { return _credentials.GetChatId(); } } // Поменять на динамически-получаемый id
-
         private readonly TelegramCredentials _credentials;
         private readonly ILogger _logger;
 
@@ -24,7 +19,7 @@ namespace telegram_lotte_bot.Handlers
             BaseAddress = new Uri(@$"https://api.telegram.org")
         };
 
-        public CommandsHandler(TelegramCredentials credentials, ILogger logger)
+        public CommandHandler(TelegramCredentials credentials, ILogger logger)
         {
             _credentials = credentials;
             _logger = logger;
@@ -32,7 +27,7 @@ namespace telegram_lotte_bot.Handlers
 
         public async Task SendMessage(long chatId, string text)
         {
-            string apiEndpoint = $"/bot{BotToken}/sendMessage";
+            string apiEndpoint = $"/bot{_credentials.GetBotToken()}/sendMessage";
 
             var content = new StringContent($"chat_id={chatId}&text={Uri.EscapeDataString(text)}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
 
@@ -51,7 +46,7 @@ namespace telegram_lotte_bot.Handlers
 
         public async Task Reply(long chatId, long id, string text)
         {
-            string apiEndpoint = $"/bot{BotToken}/sendMessage";
+            string apiEndpoint = $"/bot{_credentials.GetBotToken()}/sendMessage";
 
             var content = new StringContent($"reply_to_message_id={id}&chat_id={chatId}&text={Uri.EscapeDataString(text)}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
 
@@ -62,7 +57,7 @@ namespace telegram_lotte_bot.Handlers
 
             if (response.IsSuccessStatusCode)
             {
-                
+
 
                 _logger.LogInformation("Message reply send succesful.");
             }
@@ -72,41 +67,9 @@ namespace telegram_lotte_bot.Handlers
             }
         }
 
-        public async Task<List<Update>> GetUpdates(long offset)
+        public async Task HandleUpdates(List<Update> updates)
         {
-            string apiEndpoint = $"/bot{BotToken}/getUpdates?timeout=60&offset={offset}";
 
-            _logger.LogInformation("Receiving updates...");
-
-            var response = await _httpClient.GetAsync(apiEndpoint);
-
-            //List<Update> updates;
-
-            if (response.IsSuccessStatusCode)
-            {
-                _logger.LogInformation("Updates received.");
-
-                string stringContent = await response.Content.ReadAsStringAsync();
-
-                JObject jsonObject = JObject.Parse(stringContent);
-
-                string? resultString = jsonObject["result"]?.ToString();
-
-                if (string.IsNullOrEmpty(resultString)) return new();
-
-                return JsonConvert.DeserializeObject<List<Update>>(resultString) ?? new();
-
-                //foreach (var update in updates)
-                //{
-
-                //}
-
-            }
-            else
-            {
-                _logger.LogInformation("Updates response failed.");
-            }
-            return new();
         }
     }
 }

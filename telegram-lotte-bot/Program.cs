@@ -13,15 +13,13 @@ namespace telegram_lotte_bot
 
             TelegramCredentials credentials = new();
 
-            CommandsHandler commandsHandler = new(credentials, logger);
+            CommandHandler commandsHandler = new(credentials, logger);
 
-            long offset = 0;
-            while (true)
-            {
-                var updates = await commandsHandler.GetUpdates(offset);
+            UpdateHandler updateHandler = new(credentials, logger, commandsHandler);
 
-                updates.Select(e => offset = e.Id + 1);
-            }
+            CancellationToken cancellationToken = new CancellationToken();
+
+            await updateHandler.StartHandlingUpdates(cancellationToken);
 
         }
     }

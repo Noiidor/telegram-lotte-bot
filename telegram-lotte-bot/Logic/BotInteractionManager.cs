@@ -34,7 +34,7 @@ namespace telegram_lotte_bot.Logic
             var content = new StringContent(rawContext, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
 
             if (text.Length >= TRIM_LOG_MESSAGE_LENGHT) text = text.Remove(TRIM_LOG_MESSAGE_LENGHT) + "...";
-            _logger.LogInformation($"Chat: {chatId}\nSending {(replyToId.HasValue ? "reply" : "message")}...\n{{{text}}}"); // лол
+            _logger.LogInformation($"Chat: {chatId}\n\tSending {(replyToId.HasValue ? "reply" : "message")}... \"{text}\""); // лол
             HttpResponseMessage response = await _httpClient.PostAsync(apiEndpoint, content);
 
             if (response.IsSuccessStatusCode)

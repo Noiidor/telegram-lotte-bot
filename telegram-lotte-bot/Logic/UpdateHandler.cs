@@ -28,13 +28,10 @@ namespace telegram_lotte_bot.Logic
             while (!cancellationToken.IsCancellationRequested)
             {
                 List<MessageUpdate> updates = await GetUpdates(offset);
-                foreach (var update in updates)
-                {
-                    offset = update.Id + 1;
-                }
-                //updates.Select(e => offset = e.Id + 1);
 
-                await _commandHandler.HandleUpdates(updates);
+                updates.ForEach(e => offset = e.Id + 1);
+
+                await _commandHandler.CheckUpdates(updates);
             }
         }
 

@@ -17,7 +17,7 @@ namespace telegram_lotte_bot.Logic
             _interactionManager = interactionManager;
         }
 
-        public async Task HandleUpdates(List<MessageUpdate> updates)
+        public async Task CheckUpdates(List<MessageUpdate> updates)
         {
             foreach (var update in updates)
             {

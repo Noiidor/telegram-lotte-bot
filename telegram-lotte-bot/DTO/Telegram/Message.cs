@@ -2,7 +2,7 @@
 using System;
 using System.Reflection.Metadata;
 
-namespace telegram_lotte_bot.DTO
+namespace telegram_lotte_bot.DTO.Telegram
 {
     public record Message
     {

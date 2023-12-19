@@ -8,11 +8,11 @@ using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace telegram_lotte_bot
 {
-    public class TelegramCredentials
+    public class AppUserSecretCredentials
     {
         private IConfiguration configuration;
 
-        public TelegramCredentials()
+        public AppUserSecretCredentials()
         {
             var builder = new ConfigurationBuilder().AddUserSecrets("bf684e1b-a247-4665-b47f-2e87843a7b49");
 
@@ -22,6 +22,11 @@ namespace telegram_lotte_bot
         public string GetBotToken()
         {
             return configuration.GetSection("BotToken").Value;
+        }
+
+        public string GetAuthString()
+        {
+            return configuration.GetSection("LotteAuth").Value;
         }
     }
 }

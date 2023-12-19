@@ -1,20 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using telegram_lotte_bot.DTO;
+using telegram_lotte_bot.DTO.Telegram;
 
 namespace telegram_lotte_bot.Logic
 {
     public class UpdateHandler
     {
-        private readonly TelegramCredentials _credentials;
+        private readonly AppUserSecretCredentials _credentials;
         private readonly ILogger _logger;
         private readonly CommandHandler _commandHandler;
         private readonly HttpClient _httpClient;
 
         private const int LONG_POOLING_TIMEOUT = 60;
 
-        public UpdateHandler(TelegramCredentials credentials, ILogger logger, HttpClient httpClient, CommandHandler commandHandler)
+        public UpdateHandler(AppUserSecretCredentials credentials, ILogger logger, HttpClient httpClient, CommandHandler commandHandler)
         {
             _credentials = credentials;
             _logger = logger;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace telegram_lotte_bot.DTO
+namespace telegram_lotte_bot.DTO.Telegram
 {
     public record MessageUpdate
     {

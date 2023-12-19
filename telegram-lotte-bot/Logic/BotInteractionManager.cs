@@ -11,13 +11,13 @@ namespace telegram_lotte_bot.Logic
 {
     public class BotInteractionManager
     {
-        private readonly TelegramCredentials _credentials;
+        private readonly AppUserSecretCredentials _credentials;
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
 
         private const int TRIM_LOG_MESSAGE_LENGHT = 30;
 
-        public BotInteractionManager(TelegramCredentials credentials, ILogger logger, HttpClient httpClient)
+        public BotInteractionManager(AppUserSecretCredentials credentials, ILogger logger, HttpClient httpClient)
         {
             _credentials = credentials;
             _logger = logger;

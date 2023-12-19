@@ -9,7 +9,7 @@ namespace telegram_lotte_bot
         {
             ILogger logger = LoggerConfiguration.CreateLogger();
 
-            TelegramCredentials credentials = new();
+            AppUserSecretCredentials credentials = new();
 
             HttpClient httpClient = new HttpClient(new SocketsHttpHandler
             {
@@ -19,9 +19,11 @@ namespace telegram_lotte_bot
                 BaseAddress = new Uri(@$"https://api.telegram.org")
             };
 
+            LotteApiService lotteService = new(logger, credentials);
+
             BotInteractionManager interactionManager = new(credentials, logger, httpClient);
 
-            CommandHandler commandsHandler = new(logger, interactionManager);
+            CommandHandler commandsHandler = new(logger, interactionManager, lotteService);
 
             UpdateHandler updateHandler = new(credentials, logger, httpClient, commandsHandler);
 

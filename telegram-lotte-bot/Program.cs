@@ -19,14 +19,16 @@ namespace telegram_lotte_bot
                 BaseAddress = new Uri(@$"https://api.telegram.org")
             };
 
-            CommandHandler commandsHandler = new(credentials, logger, httpClient);
+            BotInteractionManager interactionManager = new(credentials, logger, httpClient);
+
+            CommandHandler commandsHandler = new(logger, interactionManager);
 
             UpdateHandler updateHandler = new(credentials, logger, httpClient, commandsHandler);
 
+            logger.LogInformation("Started.");
+
             CancellationToken cancellationToken = new CancellationToken();
             await updateHandler.StartHandlingUpdates(cancellationToken);
-
-            logger.LogInformation("Started.");
         }
     }
 }

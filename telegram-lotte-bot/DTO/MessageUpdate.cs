@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace telegram_lotte_bot.DTO
 {
-    public record Update
+    public record MessageUpdate
     {
         [JsonProperty("update_id")]
         public long Id { get; set; }

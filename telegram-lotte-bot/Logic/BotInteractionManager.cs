@@ -15,6 +15,8 @@ namespace telegram_lotte_bot.Logic
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
 
+        private const int TRIM_LOG_MESSAGE_LENGHT = 30;
+
         public BotInteractionManager(TelegramCredentials credentials, ILogger logger, HttpClient httpClient)
         {
             _credentials = credentials;
@@ -22,45 +24,26 @@ namespace telegram_lotte_bot.Logic
             _httpClient = httpClient;
         }
 
-        public async Task SendMessage(long chatId, string text)
+        public async Task SendMessage(long chatId, string text, long? replyToId)
         {
             string apiEndpoint = $"/bot{_credentials.GetBotToken()}/sendMessage";
 
-            var content = new StringContent($"chat_id={chatId}&text={Uri.EscapeDataString(text)}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+            string rawContext = $"chat_id={chatId}&text={Uri.EscapeDataString(text)}";
+            if (replyToId.HasValue) rawContext += $"&reply_to_message_id={replyToId}";
 
-            _logger.LogInformation("Sending message.");
+            var content = new StringContent(rawContext, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            if (text.Length >= TRIM_LOG_MESSAGE_LENGHT) text = text.Remove(TRIM_LOG_MESSAGE_LENGHT) + "...";
+            _logger.LogInformation($"Chat: {chatId}\nSending {(replyToId.HasValue ? "reply" : "message")}...\n{{{text}}}"); // лол
             HttpResponseMessage response = await _httpClient.PostAsync(apiEndpoint, content);
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Message send succesful.");
+                _logger.LogInformation("Message send succesfully.");
             }
             else
             {
-                _logger.LogInformation("Message send error.");
-            }
-        }
-
-        public async Task Reply(long chatId, long id, string text)
-        {
-            string apiEndpoint = $"/bot{_credentials.GetBotToken()}/sendMessage";
-
-            var content = new StringContent($"reply_to_message_id={id}&chat_id={chatId}&text={Uri.EscapeDataString(text)}", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
-
-            _logger.LogInformation("Sending reply.");
-            HttpResponseMessage response = await _httpClient.PostAsync(apiEndpoint, content);
-
-            string answer = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-
-
-                _logger.LogInformation("Message reply send succesful.");
-            }
-            else
-            {
-                _logger.LogInformation("Message reply error.");
+                _logger.LogInformation($"Message sent responded with code {response.StatusCode}.");
             }
         }
     }

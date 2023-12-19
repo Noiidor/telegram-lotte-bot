@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Reflection.Metadata;
 
 namespace telegram_lotte_bot.DTO
 {
@@ -19,6 +20,21 @@ namespace telegram_lotte_bot.DTO
 
         [JsonProperty("text")]
         public required string Text { get; set; }
+
+        [JsonProperty("entities")]
+        public List<Entity> Entities { get; set; } = new();
+    }
+
+    public class Entity
+    {
+        [JsonProperty("offset")]
+        public int Offset { get; set; }
+
+        [JsonProperty("length")]
+        public int Length { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; } = null!;
     }
 
     public record Chat

@@ -27,14 +27,18 @@ namespace telegram_lotte_bot.Logic
             long offset = 0;
             while (!cancellationToken.IsCancellationRequested)
             {
-                List<Update> updates = await GetUpdates(offset);
-                updates.Select(e => offset = e.Id + 1);
+                List<MessageUpdate> updates = await GetUpdates(offset);
+                foreach (var update in updates)
+                {
+                    offset = update.Id + 1;
+                }
+                //updates.Select(e => offset = e.Id + 1);
 
                 await _commandHandler.HandleUpdates(updates);
             }
         }
 
-        private async Task<List<Update>> GetUpdates(long offset)
+        private async Task<List<MessageUpdate>> GetUpdates(long offset)
         {
             string apiEndpoint = $"/bot{_credentials.GetBotToken()}/getUpdates?timeout={LONG_POOLING_TIMEOUT}&offset={offset}";
 
@@ -54,7 +58,7 @@ namespace telegram_lotte_bot.Logic
 
                 if (string.IsNullOrEmpty(resultString)) return new();
 
-                return JsonConvert.DeserializeObject<List<Update>>(resultString) ?? new();
+                return JsonConvert.DeserializeObject<List<MessageUpdate>>(resultString) ?? new();
             }
             else
             {

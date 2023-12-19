@@ -12,7 +12,7 @@ namespace telegram_lotte_bot.Logic
         private readonly CommandHandler _commandHandler;
         private readonly HttpClient _httpClient;
 
-        int LONG_POOLING_TIMEOUT = 60;
+        private const int LONG_POOLING_TIMEOUT = 60;
 
         public UpdateHandler(TelegramCredentials credentials, ILogger logger, HttpClient httpClient, CommandHandler commandHandler)
         {

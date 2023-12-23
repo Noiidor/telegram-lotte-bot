@@ -1,36 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Reflection.Metadata;
 using System.Text;
-using System.Threading.Tasks;
-using telegram_lotte_bot.DTO.Lotte;
+using telegram_lotte_bot.Application.Interfaces;
+using telegram_lotte_bot.Domain.Lotte;
 
-namespace telegram_lotte_bot.Logic
+namespace telegram_lotte_bot.Infrastructure.Lotte
 {
-    public class LotteApiService
+    public class LotteClient : ILotteClient
     {
-        private readonly ILogger _logger;
-        private readonly AppUserSecretCredentials _credentials;
-        private static readonly HttpClient _httpClient = new HttpClient(new SocketsHttpHandler
-        {
-            PooledConnectionLifetime = TimeSpan.FromHours(1)
-        })
-        {
-            BaseAddress = new Uri(@$"https://www.lottemart.vn")
-        };
+        private readonly ILogger<LotteClient> _logger;
+        private readonly ICredentialsManager _credentials;
+        private readonly HttpClient _httpClient;
 
-        public LotteApiService(ILogger logger, AppUserSecretCredentials credentials)
+        public LotteClient(ILogger<LotteClient> logger, ICredentialsManager credentials, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _credentials = credentials;
-
-            _httpClient.DefaultRequestHeaders.Add("Authorization", _credentials.GetAuthString());
+            _httpClient = httpClientFactory.CreateClient("LotteClient");
         }
 
         public async Task GetCartItems()

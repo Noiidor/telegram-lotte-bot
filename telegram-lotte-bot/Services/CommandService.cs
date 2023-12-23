@@ -4,16 +4,17 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using telegram_lotte_bot.DTO.Telegram;
 using System.Text.RegularExpressions;
+using telegram_lotte_bot.Logic;
 
-namespace telegram_lotte_bot.Logic
+namespace telegram_lotte_bot.Services
 {
-    public class CommandHandler
+    public class CommandService : ICommandService
     {
         private readonly ILogger _logger;
         private readonly BotInteractionManager _interactionManager;
         private readonly LotteApiService _lotteService;
 
-        public CommandHandler(ILogger logger, BotInteractionManager interactionManager, LotteApiService lotteService)
+        public CommandService(ILogger logger, BotInteractionManager interactionManager, LotteApiService lotteService)
         {
             _logger = logger;
             _interactionManager = interactionManager;
@@ -59,14 +60,24 @@ namespace telegram_lotte_bot.Logic
 
         private async Task HandleAddItemCommand(long chatId, long replyId, string text)
         {
-            string pattern = "\\d+";
+            long itemId = 0;
+            int itemQuantity = 0;
 
-            MatchCollection? matches = Regex.Matches(text, pattern);
-            
-            if (matches == null || matches.Count < 2) goto invalidFormat; // Нестареющая классика
+            if (text.Contains("http"))
+            {
+                string pattern = "\\d+";
 
-            if (!long.TryParse(matches[0].Value, out long itemId)) goto invalidFormat;
-            if (!int.TryParse(matches[1].Value, out int itemQuantity)) goto invalidFormat;
+                MatchCollection? matches = Regex.Matches(text, pattern);
+
+                if (matches == null || matches.Count < 2) goto invalidFormat; // Нестареющая классика
+
+                if (!long.TryParse(matches[0].Value, out itemId)) goto invalidFormat;
+                if (!int.TryParse(matches[1].Value, out itemQuantity)) goto invalidFormat;
+            }
+            else
+            {
+
+            }
 
             bool postStatus = await _lotteService.AddToCart(itemId, itemQuantity);
 
@@ -81,9 +92,9 @@ namespace telegram_lotte_bot.Logic
                 return;
             }
 
-            invalidFormat:
-                await _interactionManager.SendMessage(chatId, "Неправильный формат команды.", replyId);
-                return;
+        invalidFormat:
+            await _interactionManager.SendMessage(chatId, "Неправильный формат команды.", replyId);
+            return;
         }
     }
 }

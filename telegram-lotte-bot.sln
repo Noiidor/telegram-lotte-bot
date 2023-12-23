@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "telegram-lotte-bot", "telegram-lotte-bot\telegram-lotte-bot.csproj", "{D96B10EE-FC56-4BC5-8F61-9B8885DC953A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.Domain", "telegram-lotte-bot.Domain\telegram-lotte-bot.Domain.csproj", "{B0504251-7DF9-4C57-B82E-A58A8013AFCE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.CLI", "telegram-lotte-bot.Console\telegram-lotte-bot.CLI.csproj", "{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.Application", "telegram-lotte-bot.Application\telegram-lotte-bot.Application.csproj", "{36774C37-C230-4629-86AE-16A414993625}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.Infrastructure", "telegram-lotte-bot.Infrastructure\telegram-lotte-bot.Infrastructure.csproj", "{E30B6E0E-85B4-47FC-93B3-C87140F00938}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +17,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D96B10EE-FC56-4BC5-8F61-9B8885DC953A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D96B10EE-FC56-4BC5-8F61-9B8885DC953A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D96B10EE-FC56-4BC5-8F61-9B8885DC953A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D96B10EE-FC56-4BC5-8F61-9B8885DC953A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0504251-7DF9-4C57-B82E-A58A8013AFCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0504251-7DF9-4C57-B82E-A58A8013AFCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0504251-7DF9-4C57-B82E-A58A8013AFCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0504251-7DF9-4C57-B82E-A58A8013AFCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36774C37-C230-4629-86AE-16A414993625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36774C37-C230-4629-86AE-16A414993625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36774C37-C230-4629-86AE-16A414993625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36774C37-C230-4629-86AE-16A414993625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E30B6E0E-85B4-47FC-93B3-C87140F00938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E30B6E0E-85B4-47FC-93B3-C87140F00938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E30B6E0E-85B4-47FC-93B3-C87140F00938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E30B6E0E-85B4-47FC-93B3-C87140F00938}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

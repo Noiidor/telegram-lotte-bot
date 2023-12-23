@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using telegram_lotte_bot.Logic;
+using telegram_lotte_bot.Services;
 
 namespace telegram_lotte_bot
 {
@@ -9,7 +10,7 @@ namespace telegram_lotte_bot
         {
             ILogger logger = LoggerConfiguration.CreateLogger();
 
-            AppUserSecretCredentials credentials = new();
+            UserSecretsHelper credentials = new();
 
             HttpClient httpClient = new HttpClient(new SocketsHttpHandler
             {
@@ -23,7 +24,7 @@ namespace telegram_lotte_bot
 
             BotInteractionManager interactionManager = new(credentials, logger, httpClient);
 
-            CommandHandler commandsHandler = new(logger, interactionManager, lotteService);
+            CommandService commandsHandler = new(logger, interactionManager, lotteService);
 
             UpdateHandler updateHandler = new(credentials, logger, httpClient, commandsHandler);
 

@@ -1,26 +1,24 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using telegram_lotte_bot.DTO.Telegram;
-using telegram_lotte_bot.Services;
+using telegram_lotte_bot.Application.Interfaces;
+using telegram_lotte_bot.Domain.Telegram;
 
-namespace telegram_lotte_bot.Logic
+namespace telegram_lotte_bot.Infrastructure.Telegram
 {
-    public class UpdateHandler
+    public class UpdateHandler : IUpdateHandler
     {
-        private readonly UserSecretsHelper _credentials;
-        private readonly ILogger _logger;
-        private readonly CommandService _commandHandler;
+        private readonly ICredentialsManager _credentials;
+        private readonly ILogger<UpdateHandler> _logger;
         private readonly HttpClient _httpClient;
 
         private const int LONG_POOLING_TIMEOUT = 60;
 
-        public UpdateHandler(UserSecretsHelper credentials, ILogger logger, HttpClient httpClient, CommandService commandHandler)
+        public UpdateHandler(ILogger<UpdateHandler> logger, ICredentialsManager credentials, IHttpClientFactory httpClientFactory)
         {
             _credentials = credentials;
             _logger = logger;
-            _commandHandler = commandHandler;
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient("TelegramClient");
         }
 
         public async Task<List<MessageUpdate>> GetUpdates(long offset)

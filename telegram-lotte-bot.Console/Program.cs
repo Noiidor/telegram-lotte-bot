@@ -21,19 +21,13 @@ namespace telegram_lotte_bot.CLI
             builder.Services.AddApplicationServices(builder.Logging);
             builder.Services.AddInfrastructureServices();
 
-            //builder.Services.AddLogging(opt => opt.AddConsole());
+            var host = builder.Build();
 
             await Console.Out.WriteLineAsync("Started.");
 
-            var host = builder.Build();
-
             CancellationToken cancellationToken = new();
             var update = host.Services.GetRequiredService<IUpdateService>();
-            await update.StartReceivingUpdates(cancellationToken);// Логгер не находится почему-то
-
-            //host.Run();
-
-            
+            await update.StartReceivingUpdates(cancellationToken);
         }
     }
 }

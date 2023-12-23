@@ -22,13 +22,6 @@ namespace telegram_lotte_bot.Application
             {
                 options.TimestampFormat = "[HH:mm:ss]\n";
             });
-            //services.AddLogging(options =>
-            //{
-            //    options.AddConsole(options =>
-            //    {
-            //        options.TimestampFormat = "[HH:mm:ss]\n";
-            //    });
-            //});
 
             return services;
         }

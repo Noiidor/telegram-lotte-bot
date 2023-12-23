@@ -5,11 +5,13 @@ VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.Domain", "telegram-lotte-bot.Domain\telegram-lotte-bot.Domain.csproj", "{B0504251-7DF9-4C57-B82E-A58A8013AFCE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.CLI", "telegram-lotte-bot.Console\telegram-lotte-bot.CLI.csproj", "{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.CLI", "telegram-lotte-bot.CLI\telegram-lotte-bot.CLI.csproj", "{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.Application", "telegram-lotte-bot.Application\telegram-lotte-bot.Application.csproj", "{36774C37-C230-4629-86AE-16A414993625}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telegram-lotte-bot.Infrastructure", "telegram-lotte-bot.Infrastructure\telegram-lotte-bot.Infrastructure.csproj", "{E30B6E0E-85B4-47FC-93B3-C87140F00938}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CD6BEA01-FDCF-4B1E-A16C-0CC832A9774F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +38,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B0504251-7DF9-4C57-B82E-A58A8013AFCE} = {CD6BEA01-FDCF-4B1E-A16C-0CC832A9774F}
+		{2D17A8BA-ABCF-4A84-B76B-ADBDA864BD81} = {CD6BEA01-FDCF-4B1E-A16C-0CC832A9774F}
+		{36774C37-C230-4629-86AE-16A414993625} = {CD6BEA01-FDCF-4B1E-A16C-0CC832A9774F}
+		{E30B6E0E-85B4-47FC-93B3-C87140F00938} = {CD6BEA01-FDCF-4B1E-A16C-0CC832A9774F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7170D939-0CBA-439B-9B95-CA23C2886726}

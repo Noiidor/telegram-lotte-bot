@@ -13,6 +13,8 @@ namespace telegram_lotte_bot.Application.Telegram
         private readonly ITelegramSender _telegramSender;
         private readonly ILotteClient _lotteClient;
 
+        private static int SKU_ID_LENGHT = 13;
+
         private readonly Dictionary<string, Func<Message, Task>> _commands;
 
         public CommandService(ILogger<CommandService> logger, ITelegramSender telegramSender, ILotteClient lotteClient)
@@ -60,13 +62,13 @@ namespace telegram_lotte_bot.Application.Telegram
         {
             if (message.ReplyTo == null)
             {
-                await _telegramSender.SendMessage(message.Chat.Id, "Используйте команду ответом на список.", message.Id);
+                await _telegramSender.SendMessage(message.Chat.Id, "Используйте команду ответом на сообщение со списком.", message.Id);
                 return;
             }
 
             string messageText = message.ReplyTo.Text;
 
-            string pattern = @"(?<=-)\d+(?=-)|((?<=\s)\d)";
+            string pattern = @$"(?<=-)\d{{{SKU_ID_LENGHT}}}(?=-)|((?<=\s)\d)";
 
             MatchCollection matches = Regex.Matches(messageText, pattern);
 
@@ -76,23 +78,28 @@ namespace telegram_lotte_bot.Application.Telegram
                 return;
             }
 
+            int items = 0;
+            int itemsTotal = 0;
+
             for (int i = 0; i < matches.Count; i++)
             {
-                Match matchItemId = matches[i];
-                if (long.TryParse(matchItemId.Groups[0].Value, out long itemId))
+                string itemIdRaw = matches[i].Groups[0].Value;
+                if (long.TryParse(itemIdRaw, out long itemId))
                 {
-                    int itemQuantity = 1;
-
                     string? itemQuantityRaw = matches.Count > i + 1 ? matches[i + 1].Groups[1].Value : null;
 
                     // Если следующий match на количество отпарсился - пропускается из следующей итерации
-                    if (int.TryParse(itemQuantityRaw, out itemQuantity)) i++;
+                    if (int.TryParse(itemQuantityRaw, out int itemQuantity)) i++;
+                    else itemQuantity = 1;
 
                     await _lotteClient.AddToCart(itemId, itemQuantity);
+
+                    items++;
+                    itemsTotal += itemQuantity;
                 }
             }
 
-            await _telegramSender.SendMessage(message.Chat.Id, "Список успешно добавлен в корзину.", message.Id);
+            await _telegramSender.SendMessage(message.Chat.Id, $"Успешно добавлено {items} товаров({itemsTotal} позиций).", message.Id);
         }
 
         private async Task HandleAddItemCommand(Message message)

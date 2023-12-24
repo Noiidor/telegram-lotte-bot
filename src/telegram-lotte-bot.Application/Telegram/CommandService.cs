@@ -2,6 +2,8 @@
 using System.Text.RegularExpressions;
 using telegram_lotte_bot.Domain.Telegram;
 using telegram_lotte_bot.Application.Interfaces;
+using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace telegram_lotte_bot.Application.Telegram
 {
@@ -11,62 +13,102 @@ namespace telegram_lotte_bot.Application.Telegram
         private readonly ITelegramSender _telegramSender;
         private readonly ILotteClient _lotteClient;
 
+        private readonly Dictionary<string, Func<Message, Task>> _commands;
+
         public CommandService(ILogger<CommandService> logger, ITelegramSender telegramSender, ILotteClient lotteClient)
         {
             _logger = logger;
             _telegramSender = telegramSender;
             _lotteClient = lotteClient;
+
+            _commands = new Dictionary<string, Func<Message, Task>>()
+            {
+                {"/hi", HandleHiCommand },
+                {"/add", HandleAddItemCommand },
+                {"/addlist", HandleAddListCommand }
+            };
         }
 
         public async Task CheckUpdates(List<MessageUpdate> updates)
         {
             foreach (var update in updates)
             {
-                switch (update.Message?.Text)
+                var message = update.Message;
+                if (message == null) continue;
+
+                if (message.Entities.Count == 0 || message.Entities[0].Type != "bot_command") continue;
+
+                string command = Regex.Replace(message.Text, "@.*$", string.Empty);
+
+                foreach (var commandKeyPair in _commands)
                 {
-                    case string text when text.Contains("/hi"):
-                        await HandleHiCommand(update.Message.Chat.Id, update.Message.Id);
-                        break;
-
-                    case string text when text.Contains("/countchars"):
-                        await HandleCountCharactersCommand(update.Message.Chat.Id, update.Message.Id, text);
-                        break;
-
-                    case string text when text.Contains("/addtocart"):
-                        await HandleAddItemCommand(update.Message.Chat.Id, update.Message.Id, text);
-                        break;
-
-                    default:
-                        break;
+                    if (commandKeyPair.Key.Contains(command))
+                    {
+                        await commandKeyPair.Value.Invoke(message);
+                    }
                 }
             }
         }
 
 
-        private async Task HandleHiCommand(long chatId, long replyId)
+        private async Task HandleHiCommand(Message message)
         {
-            await _telegramSender.SendMessage(chatId, "Hi", replyId);
+            await _telegramSender.SendMessage(message.Chat.Id, "Hi", message.Id);
         }
 
-        private async Task HandleCountCharactersCommand(long chatId, long replyId, string text)
+        private async Task HandleAddListCommand(Message message)
         {
+            if (message.ReplyTo == null)
+            {
+                await _telegramSender.SendMessage(message.Chat.Id, "Используйте команду ответом на список.", message.Id);
+                return;
+            }
 
-            await _telegramSender.SendMessage(chatId, $"Количество символов: {text.Length}", replyId);
+            string messageText = message.ReplyTo.Text;
 
+            string pattern = @"(?<=-)\d+(?=-)|((?<=\s)\d)";
+
+            MatchCollection matches = Regex.Matches(messageText, pattern);
+
+            if (matches[0].Groups.Count < 2) // Матчи делятся на 2 группы: айдишники и количество
+            {
+                await _telegramSender.SendMessage(message.Chat.Id, "Не удалось обработать сообщение.", message.Id);
+                return;
+            }
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                Match matchItemId = matches[i];
+                if (long.TryParse(matchItemId.Groups[0].Value, out long itemId))
+                {
+                    int itemQuantity = 1;
+
+                    string? itemQuantityRaw = matches.Count > i + 1 ? matches[i + 1].Groups[1].Value : null;
+
+                    // Если следующий match на количество отпарсился - пропускается из следующей итерации
+                    if (int.TryParse(itemQuantityRaw, out itemQuantity)) i++;
+
+                    await _lotteClient.AddToCart(itemId, itemQuantity);
+                }
+            }
+
+            await _telegramSender.SendMessage(message.Chat.Id, "Список успешно добавлен в корзину.", message.Id);
         }
 
-        private async Task HandleAddItemCommand(long chatId, long replyId, string text)
+        private async Task HandleAddItemCommand(Message message)
         {
+            string messageText = message.Text;
+
             long itemId = 0;
             int itemQuantity = 0;
 
-            bool isUrl = text.Contains("http");
+            bool isUrl = messageText.Contains("http");
 
             if (isUrl)
             {
                 string pattern = @"-\d*-";
 
-                Match match = Regex.Match(text, pattern);
+                Match match = Regex.Match(messageText, pattern);
 
                 if (!match.Success) goto invalidFormat; // Нестареющая классика
 
@@ -76,7 +118,7 @@ namespace telegram_lotte_bot.Application.Telegram
 
                 pattern = @"\s\d";
 
-                match = Regex.Match(text, pattern);
+                match = Regex.Match(messageText, pattern);
 
                 if (!match.Success) goto invalidFormat;
 
@@ -86,7 +128,7 @@ namespace telegram_lotte_bot.Application.Telegram
             {
                 string pattern = "\\d+";
 
-                MatchCollection? matches = Regex.Matches(text, pattern);
+                MatchCollection? matches = Regex.Matches(messageText, pattern);
 
                 if (matches == null || matches.Count < 2) goto invalidFormat; 
 
@@ -98,17 +140,17 @@ namespace telegram_lotte_bot.Application.Telegram
 
             if (postStatus)
             {
-                await _telegramSender.SendMessage(chatId, "Добавлено в корзину.", replyId);
+                await _telegramSender.SendMessage(message.Chat.Id, "Добавлено в корзину.", message.Id);
                 return;
             }
             else
             {
-                await _telegramSender.SendMessage(chatId, "Не удалось добавить в корзину.", replyId);
+                await _telegramSender.SendMessage(message.Chat.Id, "Не удалось добавить в корзину.", message.Id);
                 return;
             }
 
         invalidFormat:
-            await _telegramSender.SendMessage(chatId, "Неправильный формат команды.", replyId);
+            await _telegramSender.SendMessage(message.Chat.Id, "Неправильный формат команды.", message.Id);
             return;
         }
     }

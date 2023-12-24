@@ -10,10 +10,13 @@ namespace telegram_lotte_bot.Domain.Telegram
         public long Id { get; set; }
 
         [JsonProperty("from")]
-        public MessageFrom? From { get; set; }
+        public User? From { get; set; }
 
         [JsonProperty("chat")]
         public required Chat Chat { get; set; }
+
+        [JsonProperty("reply_to_message")]
+        public Message? ReplyTo { get; set; }
 
         [JsonProperty("date")]
         public string Date { get; set; } = null!;
@@ -49,7 +52,7 @@ namespace telegram_lotte_bot.Domain.Telegram
         public string Type { get; set; } = null!;
     }
 
-    public record MessageFrom
+    public record User
     {
         [JsonProperty("id")]
         public long Id { get; set; }

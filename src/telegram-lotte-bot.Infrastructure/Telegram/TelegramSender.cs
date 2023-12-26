@@ -40,5 +40,10 @@ namespace telegram_lotte_bot.Infrastructure.Telegram
                 _logger.LogInformation($"Message sent responded with code {response.StatusCode}.");
             }
         }
+
+        public async Task EditMessage(long chatId, int messageId, string text)
+        {
+
+        }
     }
 }

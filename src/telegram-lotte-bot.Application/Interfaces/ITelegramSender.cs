@@ -9,5 +9,6 @@ namespace telegram_lotte_bot.Application.Interfaces
     public interface ITelegramSender
     {
         Task SendMessage(long chatId, string text, long? replyToId);
+        Task EditMessage(long chatId, int messageId, string text);
     }
 }

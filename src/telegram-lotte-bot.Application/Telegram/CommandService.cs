@@ -13,7 +13,7 @@ namespace telegram_lotte_bot.Application.Telegram
         private readonly ITelegramSender _telegramSender;
         private readonly ILotteClient _lotteClient;
 
-        private static int SKU_ID_LENGHT = 13;
+        private static readonly int SKU_ID_LENGHT = 13;
 
         private readonly Dictionary<string, Func<Message, Task>> _commands;
 
@@ -92,10 +92,13 @@ namespace telegram_lotte_bot.Application.Telegram
                     if (int.TryParse(itemQuantityRaw, out int itemQuantity)) i++;
                     else itemQuantity = 1;
 
-                    await _lotteClient.AddToCart(itemId, itemQuantity);
+                    bool success = await _lotteClient.AddToCart(itemId, itemQuantity);
 
-                    items++;
-                    itemsTotal += itemQuantity;
+                    if (success)
+                    {
+                        items++;
+                        itemsTotal += itemQuantity;
+                    }
                 }
             }
 
@@ -106,8 +109,8 @@ namespace telegram_lotte_bot.Application.Telegram
         {
             string messageText = message.Text;
 
-            long itemId = 0;
-            int itemQuantity = 0;
+            long itemId;
+            int itemQuantity;
 
             bool isUrl = messageText.Contains("http");
 

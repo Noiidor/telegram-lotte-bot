@@ -81,6 +81,8 @@ namespace telegram_lotte_bot.Application.Telegram
             int items = 0;
             int itemsTotal = 0;
 
+            Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Добавляю...", message.Id);
+
             List<Task> requests = new();
 
             for (int i = 0; i < matches.Count; i++)
@@ -109,8 +111,15 @@ namespace telegram_lotte_bot.Application.Telegram
             }
 
             await Task.WhenAll(requests);
-
-            await _telegramSender.SendMessage(message.Chat.Id, $"Успешно добавлено {items} товаров({itemsTotal} позиций).", message.Id);
+            if (inProcessMessage != null)
+            {
+                await _telegramSender.EditMessage(inProcessMessage.Chat.Id, inProcessMessage.Id, 
+                    $"Успешно добавлено {items} товаров({itemsTotal} позиций).");
+            }
+            else
+            {
+                await _telegramSender.SendMessage(message.Chat.Id, $"Успешно добавлено {items} товаров({itemsTotal} позиций).", message.Id);
+            }
         }
 
         private async Task HandleAddItemCommand(Message message)

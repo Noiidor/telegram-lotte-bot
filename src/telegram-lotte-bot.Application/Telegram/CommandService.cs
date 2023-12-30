@@ -72,16 +72,14 @@ namespace telegram_lotte_bot.Application.Telegram
 
             MatchCollection matches = Regex.Matches(messageText, pattern);
 
-            if (matches[0].Groups.Count < 2) // Матчи делятся на 2 группы: айдишники и количество
+            if (matches[0].Groups.Count < 2 || matches.Count < 1) // Матчи делятся на 2 группы: айдишники и количество
             {
                 await _telegramSender.SendMessage(message.Chat.Id, "Не удалось обработать сообщение.", message.Id);
                 return;
             }
 
-            int successItemsUnique = 0;
-            int succesItemsTotal = 0;
-            int failedItemsUnique = 0;
-            int faileditemsTotal = 0;
+            int successItemsUnique = 0, succesItemsTotal = 0;
+            int failedItemsUnique = 0, faileditemsTotal = 0;
 
             Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Добавляю...", message.Id);
 

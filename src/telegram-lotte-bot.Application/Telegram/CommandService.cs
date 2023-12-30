@@ -78,8 +78,10 @@ namespace telegram_lotte_bot.Application.Telegram
                 return;
             }
 
-            int items = 0;
-            int itemsTotal = 0;
+            int successItemsUnique = 0;
+            int succesItemsTotal = 0;
+            int failedItemsUnique = 0;
+            int faileditemsTotal = 0;
 
             Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Добавляю...", message.Id);
 
@@ -102,8 +104,13 @@ namespace telegram_lotte_bot.Application.Telegram
 
                         if (success)
                         {
-                            items++;
-                            itemsTotal += itemQuantity;
+                            successItemsUnique++;
+                            succesItemsTotal += itemQuantity;
+                        }
+                        else
+                        {
+                            failedItemsUnique++;
+                            faileditemsTotal += itemQuantity;
                         }
                     });
                     requests.Add(addRequest);
@@ -111,14 +118,17 @@ namespace telegram_lotte_bot.Application.Telegram
             }
 
             await Task.WhenAll(requests);
+
+            string resultMessage = $"Успешно добавлено {successItemsUnique} товаров({succesItemsTotal} позиций).";
+            resultMessage += $"Не удалось добавить {failedItemsUnique} товаров({faileditemsTotal} позиций).";
+
             if (inProcessMessage != null)
             {
-                await _telegramSender.EditMessage(inProcessMessage.Chat.Id, inProcessMessage.Id, 
-                    $"Успешно добавлено {items} товаров({itemsTotal} позиций).");
+                await _telegramSender.EditMessage(inProcessMessage.Chat.Id, inProcessMessage.Id, resultMessage);
             }
             else
             {
-                await _telegramSender.SendMessage(message.Chat.Id, $"Успешно добавлено {items} товаров({itemsTotal} позиций).", message.Id);
+                await _telegramSender.SendMessage(message.Chat.Id, resultMessage, message.Id);
             }
         }
 

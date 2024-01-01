@@ -8,6 +8,6 @@ namespace telegram_lotte_bot.Application.Interfaces
 {
     public interface ILotteClient
     {
-        Task<bool> AddToCart(long itemId, int quantity);
+        Task<bool> AddToCart(string itemId, int quantity);
     }
 }

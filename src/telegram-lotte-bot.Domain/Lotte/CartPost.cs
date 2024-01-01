@@ -19,7 +19,7 @@ namespace telegram_lotte_bot.Domain.Lotte
     public record CartPostItem
     {
         [JsonProperty("sku")]
-        public long Id { get; set; }
+        public required string Id { get; set; }
 
         [JsonProperty("qty")]
         public int Quantity { get; set; }

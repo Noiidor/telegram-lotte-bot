@@ -87,37 +87,35 @@ namespace telegram_lotte_bot.Application.Telegram
 
             for (int i = 0; i < matches.Count; i++)
             {
-                string itemIdRaw = matches[i].Groups[0].Value;
-                if (long.TryParse(itemIdRaw, out long itemId))
+                string itemId = matches[i].Groups[0].Value;
+
+                string? itemQuantityRaw = matches.Count > i + 1 ? matches[i + 1].Groups[1].Value : null;
+
+                // Если следующий match на количество отпарсился - пропускается из следующей итерации
+                if (int.TryParse(itemQuantityRaw, out int itemQuantity)) i++;
+                else itemQuantity = 1;
+
+                Task addRequest = Task.Run(async () =>
                 {
-                    string? itemQuantityRaw = matches.Count > i + 1 ? matches[i + 1].Groups[1].Value : null;
+                    bool success = await _lotteClient.AddToCart(itemId, itemQuantity);
 
-                    // Если следующий match на количество отпарсился - пропускается из следующей итерации
-                    if (int.TryParse(itemQuantityRaw, out int itemQuantity)) i++;
-                    else itemQuantity = 1;
-
-                    Task addRequest = Task.Run(async () =>
+                    if (success)
                     {
-                        bool success = await _lotteClient.AddToCart(itemId, itemQuantity);
-
-                        if (success)
-                        {
-                            successItemsUnique++;
-                            succesItemsTotal += itemQuantity;
-                        }
-                        else
-                        {
-                            failedItemsUnique++;
-                            faileditemsTotal += itemQuantity;
-                        }
-                    });
-                    requests.Add(addRequest);
-                }
+                        successItemsUnique++;
+                        succesItemsTotal += itemQuantity;
+                    }
+                    else
+                    {
+                        failedItemsUnique++;
+                        faileditemsTotal += itemQuantity;
+                    }
+                });
+                requests.Add(addRequest);
             }
 
             await Task.WhenAll(requests);
 
-            string resultMessage = $"Успешно добавлено {successItemsUnique} товаров({succesItemsTotal} позиций).";
+            string resultMessage = $"Успешно добавлено {successItemsUnique} товаров({succesItemsTotal} позиций).\n";
             resultMessage += $"Не удалось добавить {failedItemsUnique} товаров({faileditemsTotal} позиций).";
 
             if (inProcessMessage != null)
@@ -134,7 +132,7 @@ namespace telegram_lotte_bot.Application.Telegram
         {
             string messageText = message.Text;
 
-            long itemId;
+            string itemId;
             int itemQuantity;
 
             bool isUrl = messageText.Contains("http");
@@ -147,9 +145,7 @@ namespace telegram_lotte_bot.Application.Telegram
 
                 if (!match.Success) goto invalidFormat; // Нестареющая классика
 
-                string idStr = match.Value.Replace("-", null);
-
-                if (!long.TryParse(idStr, out itemId)) goto invalidFormat;
+                itemId = match.Value.Replace("-", null);
 
                 pattern = @"\s\d";
 
@@ -167,7 +163,8 @@ namespace telegram_lotte_bot.Application.Telegram
 
                 if (matches == null || matches.Count < 2) goto invalidFormat; 
 
-                if (!long.TryParse(matches[0].Value, out itemId)) goto invalidFormat;
+                itemId = matches[0].Value;
+
                 if (!int.TryParse(matches[1].Value, out itemQuantity)) goto invalidFormat;
             }
 

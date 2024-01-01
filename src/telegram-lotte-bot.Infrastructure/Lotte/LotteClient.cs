@@ -26,7 +26,7 @@ namespace telegram_lotte_bot.Infrastructure.Lotte
 
         }
 
-        public async Task<bool> AddToCart(long itemId, int quantity)
+        public async Task<bool> AddToCart(string itemId, int quantity)
         {
             string apiEndpoint = "/v1/p/mart/bos/en_ntg/V1/carts-later/mine/items";
 

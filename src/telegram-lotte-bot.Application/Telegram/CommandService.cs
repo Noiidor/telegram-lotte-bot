@@ -116,7 +116,7 @@ namespace telegram_lotte_bot.Application.Telegram
             await Task.WhenAll(requests);
 
             string resultMessage = $"Успешно добавлено {successItemsUnique} товаров({succesItemsTotal} позиций).\n";
-            resultMessage += $"Не удалось добавить {failedItemsUnique} товаров({faileditemsTotal} позиций).";
+            if (failedItemsUnique > 0) resultMessage += $"Не удалось добавить {failedItemsUnique} товаров({faileditemsTotal} позиций).";
 
             if (inProcessMessage != null)
             {

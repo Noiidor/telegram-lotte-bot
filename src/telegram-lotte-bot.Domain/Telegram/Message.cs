@@ -26,6 +26,9 @@ namespace telegram_lotte_bot.Domain.Telegram
 
         [JsonProperty("entities")]
         public List<Entity> Entities { get; set; } = new();
+
+        public Message()
+        { }
     }
 
     public class Entity
@@ -38,6 +41,9 @@ namespace telegram_lotte_bot.Domain.Telegram
 
         [JsonProperty("type")]
         public string Type { get; set; } = null!;
+
+        public Entity()
+        { }
     }
 
     public record Chat
@@ -50,6 +56,9 @@ namespace telegram_lotte_bot.Domain.Telegram
 
         [JsonProperty("type")]
         public string Type { get; set; } = null!;
+
+        public Chat()
+        { }
     }
 
     public record User
@@ -62,5 +71,8 @@ namespace telegram_lotte_bot.Domain.Telegram
 
         [JsonProperty("username")]
         public string Username { get; set; } = null!;
+
+        public User()
+        { }
     }
 }

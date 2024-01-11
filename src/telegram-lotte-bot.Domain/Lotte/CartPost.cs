@@ -14,6 +14,9 @@ namespace telegram_lotte_bot.Domain.Lotte
 
         [JsonProperty("cart_type")]
         public string CartType { get; set; } = "mart";
+
+        public CartPost()
+        { }
     }
 
     public record CartPostItem
@@ -26,5 +29,8 @@ namespace telegram_lotte_bot.Domain.Lotte
 
         [JsonProperty("is_ready_checkout")]
         public int ReadyCheckout { get; set; } = 1;
+
+        public CartPostItem()
+        { }
     }
 }

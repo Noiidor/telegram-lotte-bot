@@ -14,7 +14,11 @@ namespace telegram_lotte_bot.Application
 
         public string GetBotToken()
         {
+//#if DEBUG
             return configuration.GetSection("BotToken").Value;
+//#else
+            //ret
+//#endif
         }
 
         public string GetAuthString()

@@ -1,0 +1,6 @@
+services:
+  lotte-bot:
+    build:
+      context: .
+      target: final
+    env_file: .env

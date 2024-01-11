@@ -14,5 +14,8 @@ namespace telegram_lotte_bot.Domain.Telegram
 
         [JsonProperty("message")]
         public Message? Message { get; set; }
+
+        public MessageUpdate()
+        { }
     }
 }

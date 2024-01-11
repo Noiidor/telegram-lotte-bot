@@ -45,7 +45,9 @@ namespace telegram_lotte_bot.Infrastructure.Telegram
             }
             else
             {
-                _logger.LogInformation("Updates response failed.");
+                _logger.LogWarning(await response.Content.ReadAsStringAsync());
+
+                _logger.LogWarning("Updates response failed.");
             }
             return new();
         }

@@ -36,8 +36,6 @@ namespace telegram_lotte_bot.Infrastructure.Telegram
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Message send succesfully.");
-
                 string resContent = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<MessageResult>(resContent)!.Message;
             }
@@ -63,8 +61,6 @@ namespace telegram_lotte_bot.Infrastructure.Telegram
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Message edited succesfully.");
-
                 string resContent = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<MessageResult>(resContent)!.Message;
             }

@@ -2,8 +2,7 @@
 using System.Text.RegularExpressions;
 using telegram_lotte_bot.Domain.Telegram;
 using telegram_lotte_bot.Application.Interfaces;
-using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
+using telegram_lotte_bot.Domain.Lotte;
 
 namespace telegram_lotte_bot.Application.Telegram
 {
@@ -13,7 +12,7 @@ namespace telegram_lotte_bot.Application.Telegram
         private readonly ITelegramSender _telegramSender;
         private readonly ILotteClient _lotteClient;
 
-        private static readonly int SKU_ID_LENGHT = 13;
+        //private static readonly int SKU_ID_LENGHT = 13;
 
         private readonly Dictionary<string, Func<Message, Task>> _commands;
 
@@ -60,39 +59,51 @@ namespace telegram_lotte_bot.Application.Telegram
 
         private async Task HandleAddListCommand(Message message)
         {
+            const int SKU_ID_LENGHT = 13;
+            const char CURRENCY_SYMBOL = '₫';
+
             if (message.ReplyTo == null)
             {
-                await _telegramSender.SendMessage(message.Chat.Id, "Используйте команду ответом на сообщение со списком.", message.Id);
+                await _telegramSender.SendMessage(message.Chat.Id, "Use command with reply on list message.", message.Id);
                 return;
             }
 
             string messageText = message.ReplyTo.Text;
 
-            string pattern = @$"(?<=-)\d{{{SKU_ID_LENGHT}}}(?=-)|((?<=\s)\d)";
+            string urlKeysPattern = @"(?<=product\/)[^\s]+";
 
-            MatchCollection matches = Regex.Matches(messageText, pattern);
+            MatchCollection urlKeysMatches = Regex.Matches(messageText, urlKeysPattern);
 
-            if (matches[0].Groups.Count < 2 || matches.Count < 1) // Матчи делятся на 2 группы: айдишники и количество
+            string idAndQuantityPattern = @$"(?<=-)\d{{{SKU_ID_LENGHT}}}(?=-)|((?<=\s)\d)";
+
+            MatchCollection idAndQuantityMatches = Regex.Matches(messageText, idAndQuantityPattern);
+
+            if (idAndQuantityMatches[0].Groups.Count < 2 || idAndQuantityMatches.Count < 1) // Матчи делятся на 2 группы: айдишники и количество
             {
-                await _telegramSender.SendMessage(message.Chat.Id, "Не удалось обработать сообщение.", message.Id);
+                await _telegramSender.SendMessage(message.Chat.Id, "Failed to process the message.", message.Id);
                 return;
             }
 
             int successItemsUnique = 0, succesItemsTotal = 0;
             int failedItemsUnique = 0, faileditemsTotal = 0;
+            int totalPrice = 0;
 
-            Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Добавляю...", message.Id);
+            Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Adding...", message.Id);
 
             List<Task> requests = new();
 
-            for (int i = 0; i < matches.Count; i++)
+            for (int i = 0, j = 0; i < idAndQuantityMatches.Count; i++, j++)
             {
-                string itemId = matches[i].Groups[0].Value;
+                string itemId = idAndQuantityMatches[i].Groups[0].Value;
 
-                string? itemQuantityRaw = matches.Count > i + 1 ? matches[i + 1].Groups[1].Value : null;
+                string? itemQuantityRaw = idAndQuantityMatches.Count > i + 1 ? idAndQuantityMatches[i + 1].Groups[1].Value : null;
 
                 // Если следующий match на количество отпарсился - пропускается из следующей итерации
-                if (int.TryParse(itemQuantityRaw, out int itemQuantity)) i++;
+                if (int.TryParse(itemQuantityRaw, out int itemQuantity))
+                {
+                    i++;
+                    j--;
+                }
                 else itemQuantity = 1;
 
                 Task addRequest = Task.Run(async () =>
@@ -103,6 +114,12 @@ namespace telegram_lotte_bot.Application.Telegram
                     {
                         successItemsUnique++;
                         succesItemsTotal += itemQuantity;
+
+                        ItemInfo? itemInfo = await _lotteClient.GetItemInfo(urlKeysMatches[j].Value);
+                        if (itemInfo != null)
+                        {
+                            totalPrice += itemInfo.Price.Vnd.CurrentPrice;
+                        }
                     }
                     else
                     {
@@ -115,8 +132,9 @@ namespace telegram_lotte_bot.Application.Telegram
 
             await Task.WhenAll(requests);
 
-            string resultMessage = $"Успешно добавлено {successItemsUnique} товаров({succesItemsTotal} позиций).\n";
-            if (failedItemsUnique > 0) resultMessage += $"Не удалось добавить {failedItemsUnique} товаров({faileditemsTotal} позиций).";
+            string resultMessage = $"Successfully added {successItemsUnique} items({succesItemsTotal} in total).\n";
+            resultMessage += $"Total price is {totalPrice:N0} {CURRENCY_SYMBOL}.\n";
+            if (failedItemsUnique > 0) resultMessage += $"Failed to add {failedItemsUnique} items({faileditemsTotal} in total).";
 
             if (inProcessMessage != null)
             {
@@ -172,17 +190,17 @@ namespace telegram_lotte_bot.Application.Telegram
 
             if (postStatus)
             {
-                await _telegramSender.SendMessage(message.Chat.Id, "Добавлено в корзину.", message.Id);
+                await _telegramSender.SendMessage(message.Chat.Id, "Added to cart.", message.Id);
                 return;
             }
             else
             {
-                await _telegramSender.SendMessage(message.Chat.Id, "Не удалось добавить в корзину.", message.Id);
+                await _telegramSender.SendMessage(message.Chat.Id, "Failed to add to cart.", message.Id);
                 return;
             }
 
         invalidFormat:
-            await _telegramSender.SendMessage(message.Chat.Id, "Неправильный формат команды.", message.Id);
+            await _telegramSender.SendMessage(message.Chat.Id, "Invalid command format.", message.Id);
             return;
         }
     }

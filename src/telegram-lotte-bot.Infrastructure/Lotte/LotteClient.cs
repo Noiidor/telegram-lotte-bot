@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Text;
 using telegram_lotte_bot.Application.Interfaces;
 using telegram_lotte_bot.Domain.Lotte;
@@ -42,20 +43,52 @@ namespace telegram_lotte_bot.Infrastructure.Lotte
 
             StringContent jsonContent = new(JsonConvert.SerializeObject(cart), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation("Sending POST request to add cart item...");
+            _logger.LogInformation("POST item to cart...");
             HttpResponseMessage response = await _httpClient.PostAsync(apiEndpoint, jsonContent);
 
-            string content = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode) return true;
+            else
+            {
+                string errorMessage = $"{response.StatusCode}";
+
+                string? message = JObject.Parse(await response.Content.ReadAsStringAsync())?.SelectToken("message")?.ToString();
+                if (message != null) errorMessage += $"\n\t{message}";
+
+                _logger.LogWarning($"Item POST to cart error: {errorMessage}.");
+
+                return false;
+            }
+        }
+
+        public async Task<ItemInfo?> GetItemInfo(string urlKey)
+        {
+            string apiEndpoint = "/_next/data/-f_sRVlNCx0_DRruvtyOK/en-ntg/product/";
+
+            apiEndpoint += urlKey + ".json";
+
+            _logger.LogInformation("GET Item...");
+            HttpResponseMessage response = await _httpClient.GetAsync(apiEndpoint);
+
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Item added succesfully.");
-                return true;
+                JObject jsonObject = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+                var itemContent = jsonObject.SelectToken("pageProps.content")?.ToObject<ItemInfo>();
+
+                if (itemContent == null)
+                {
+                    _logger.LogError($"Item GET could not parse item content.");
+                    return null;
+                }
+
+                return itemContent;
+
             }
             else
             {
-                _logger.LogInformation($"Error status code while adding item to cart: {response.StatusCode}.");
-                return false;
+                _logger.LogWarning($"Item GET error: {response.StatusCode}.");
+                return null;
             }
         }
     }

@@ -16,8 +16,11 @@ namespace telegram_lotte_bot.CLI
         {
             var builder = Host.CreateApplicationBuilder(args);
 
+#if DEBUG
             builder.Configuration.AddUserSecrets("bf684e1b-a247-4665-b47f-2e87843a7b49");
+#else
             builder.Configuration.AddEnvironmentVariables();
+#endif
 
             builder.Services.AddApplicationServices(builder.Logging);
             builder.Services.AddInfrastructureServices();

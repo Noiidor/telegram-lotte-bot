@@ -58,7 +58,7 @@ namespace telegram_lotte_bot.Application.Telegram
             await _telegramSender.SendMessage(message.Chat.Id, "Hi", message.Id);
         }
 
-        private Dictionary<string, int>? ParseItemsList(string message)
+        private Dictionary<string, int>? ParseItemsQuantityList(string message)
         {
             string idAndQuantityPattern = @$"(?<=-)\d{{{SKU_ID_LENGHT}}}(?=-)|((?<=\s)\d)";
 
@@ -104,9 +104,10 @@ namespace telegram_lotte_bot.Application.Telegram
             //string urlKeysPattern = @"(?<=product\/)[^\s]+";
             //MatchCollection urlKeysMatches = Regex.Matches(messageText, urlKeysPattern);
 
-            Dictionary<string, int>? items = ParseItemsList(messageText);
+            Dictionary<string, int>? itemsQuantity = ParseItemsQuantityList(messageText);
+            List<string>? itemUrls = ParseItemUrls(messageText);
             
-            if (items == null)
+            if (itemsQuantity == null || itemUrls == null || itemsQuantity.Count != itemUrls.Count)
             {
                 await _telegramSender.SendMessage(message.Chat.Id, "Failed to process the message.", message.Id);
                 return;
@@ -115,17 +116,18 @@ namespace telegram_lotte_bot.Application.Telegram
             int successItemsUnique = 0, succesItemsTotal = 0;
             int failedItemsUnique = 0, faileditemsTotal = 0;
             int totalPrice = 0;
+            List<string> failedItems = new();
 
             Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Adding...", message.Id);
 
             List<Task> requests = new();
 
-            foreach (var itemPair in items)
+            for (int i = 0; i < itemsQuantity.Count; i++)
             {
-                string itemId = itemPair.Key;
-                int itemQuantity = itemPair.Value;
+                string itemId = itemsQuantity.ElementAt(i).Key;
+                int itemQuantity = itemsQuantity.ElementAt(i).Value;
 
-                Task addRequest = Task.Run(async () =>
+                async Task addToCart(int currentIndex)
                 {
                     bool success = await _lotteClient.AddToCart(itemId, itemQuantity);
 
@@ -142,18 +144,26 @@ namespace telegram_lotte_bot.Application.Telegram
                     }
                     else
                     {
+                        failedItems.Add(itemUrls[currentIndex]);
                         failedItemsUnique++;
                         faileditemsTotal += itemQuantity;
                     }
-                });
-                requests.Add(addRequest);
+                }
+
+                requests.Add(addToCart(i));
             }
+
 
             await Task.WhenAll(requests);
 
             string resultMessage = $"Successfully added {successItemsUnique} items({succesItemsTotal} in total).\n";
-            resultMessage += $"Total price is {totalPrice:N0} {CURRENCY_SYMBOL}.\n";
-            if (failedItemsUnique > 0) resultMessage += $"Failed to add {failedItemsUnique} items({faileditemsTotal} in total).";
+            //resultMessage += $"Total price is {totalPrice:N0} {CURRENCY_SYMBOL}.\n";
+            if (failedItemsUnique > 0) 
+            {
+                resultMessage += $"Failed to add {failedItemsUnique} items({faileditemsTotal} in total): \n";
+                resultMessage += string.Join('\n', failedItems);
+            }
+                
 
             if (inProcessMessage != null)
             {
@@ -163,6 +173,22 @@ namespace telegram_lotte_bot.Application.Telegram
             {
                 await _telegramSender.SendMessage(message.Chat.Id, resultMessage, message.Id);
             }
+        }
+
+        private List<string>? ParseItemUrls(string message)
+        {
+            string itemUrlPattern = @$"http\S+";
+
+            MatchCollection itemUrlsMatches = Regex.Matches(message, itemUrlPattern);
+
+            if (itemUrlsMatches.Count < 1)
+            {
+                return null;
+            }
+
+            List<string> urls = itemUrlsMatches.Select(m => m.Value).ToList();
+
+            return urls;
         }
 
         private async Task HandleAddItemCommand(Message message)

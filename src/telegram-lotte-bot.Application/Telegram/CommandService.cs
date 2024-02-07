@@ -115,7 +115,7 @@ namespace telegram_lotte_bot.Application.Telegram
 
             int successItemsUnique = 0, succesItemsTotal = 0;
             int failedItemsUnique = 0, faileditemsTotal = 0;
-            int totalPrice = 0;
+            //int totalPrice = 0;
             List<string> failedItems = new();
 
             Message? inProcessMessage = await _telegramSender.SendMessage(message.Chat.Id, "Adding...", message.Id);
@@ -153,7 +153,6 @@ namespace telegram_lotte_bot.Application.Telegram
                 requests.Add(addToCart(i));
             }
 
-
             await Task.WhenAll(requests);
 
             string resultMessage = $"Successfully added {successItemsUnique} items({succesItemsTotal} in total).\n";
@@ -164,7 +163,6 @@ namespace telegram_lotte_bot.Application.Telegram
                 resultMessage += string.Join('\n', failedItems);
             }
                 
-
             if (inProcessMessage != null)
             {
                 await _telegramSender.EditMessage(inProcessMessage.Chat.Id, inProcessMessage.Id, resultMessage);

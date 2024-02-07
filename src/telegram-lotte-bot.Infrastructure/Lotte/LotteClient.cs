@@ -44,7 +44,18 @@ namespace telegram_lotte_bot.Infrastructure.Lotte
             StringContent jsonContent = new(JsonConvert.SerializeObject(cart), Encoding.UTF8, "application/json");
 
             _logger.LogInformation("POST item to cart...");
-            HttpResponseMessage response = await _httpClient.PostAsync(apiEndpoint, jsonContent);
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsync(apiEndpoint, jsonContent);
+            }
+
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("POST item request timed out.");
+                return false;
+            }
 
             if (response.IsSuccessStatusCode) return true;
             else
